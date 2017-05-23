@@ -84,7 +84,7 @@ public class MainServer extends UnicastRemoteObject implements InterfaceServer {
 	
 	@Override
 	public void commit(String username, Map<Integer, Product> cart) throws RemoteException {
-		Set<Integer> keyset = this.products.keySet();
+		Set<Integer> keyset = cart.keySet();
 		Client client = this.users.get(username);
 		for (int id : keyset) {
 			Product product_original = this.products.get(id);
@@ -105,7 +105,7 @@ public class MainServer extends UnicastRemoteObject implements InterfaceServer {
 	
 	@Override
 	public boolean validate(Map<Integer, Product> products, Map<Integer, Product> cart) throws RemoteException {
-		Set<Integer> keyset = products.keySet();
+		Set<Integer> keyset = cart.keySet();
 		for (int id : keyset) {
 			Product product_copy = products.get(id);
 			Product product_original = this.products.get(id);

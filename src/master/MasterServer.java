@@ -34,7 +34,7 @@ public class MasterServer extends UnicastRemoteObject implements InterfaceMaster
 		this.proccesing = false;
 	}
 	
-	private void proccess() {
+	private void proccess() throws RemoteException {
 		while (this.proccesing) {
 			Transaction transaction = MasterServer.this.transactions.poll();
 			System.out.println("Corriendo");
@@ -55,6 +55,9 @@ public class MasterServer extends UnicastRemoteObject implements InterfaceMaster
 								System.out.println("Error: [" + event.getMessage() + "]");
 								this.servers.pop();
 							}
+						}
+						if (this.servers.size() == 0) {
+							user.getItems(true);
 						}
 					}
 				}
