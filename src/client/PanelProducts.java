@@ -90,11 +90,9 @@ public class PanelProducts extends JScrollPane {
 			int i = 0;
 			for (int id : keys) {
 				Product product = products.get(id);
-				if (product.getExistence() > 0) {
-					ProductView productView = new ProductView(product);
-					this.productsViews.add(productView);
-					this.panelProducts.add(productView, "cell 1 " + i++ + ",grow");
-				}
+				ProductView productView = new ProductView(product);
+				this.productsViews.add(productView);
+				this.panelProducts.add(productView, "cell 1 " + i++ + ",grow");
 			}
 			this.panelProducts.updateUI();
 		}

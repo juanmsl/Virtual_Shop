@@ -24,40 +24,44 @@ public class MasterServer extends UnicastRemoteObject implements InterfaceMaster
 	private Stack<InterfaceServer> servers;
 	private String myHost;
 	private Queue<Transaction> transactions;
-	private Thread checkTransactions;
+	private boolean proccesing;
 	
 	public MasterServer() throws RemoteException, UnknownHostException {
 		this.users = new HashMap<>();
 		this.servers = new Stack<>();
 		this.transactions = new LinkedList<>();
 		this.myHost = InetAddress.getLocalHost().getHostAddress();
-		this.checkTransactions = new Thread(new Runnable() {
-			
-			@Override
-			public void run() {
-				try {
-					while (true) {
-						Transaction transaction = MasterServer.this.transactions.poll();
-						if (transaction != null) {
-							if (!transaction.isProcesed()) {
-								if (transaction.validate()) {
-									InterfaceClient user = MasterServer.this.users.get(transaction.getHost());
-									InterfaceServer server = MasterServer.this.servers.peek();
-									server.commit(user.getUsername(), transaction.getCart());
-									user.getItems(true);
-								}
+		this.proccesing = false;
+	}
+	
+	private void proccess() {
+		while (this.proccesing) {
+			Transaction transaction = MasterServer.this.transactions.poll();
+			System.out.println("Corriendo");
+			if (transaction != null) {
+				if (!transaction.isProcesed()) {
+					System.out.println("Processing transaction " + transaction.getHost());
+					if (transaction.validate()) {
+						InterfaceClient user = MasterServer.this.users.get(transaction.getHost());
+						while (this.servers.size() > 0) {
+							InterfaceServer server = this.servers.peek();
+							try {
+								server.commit(user.getUsername(), transaction.getCart());
+								this.sincronizedServers(server);
+								user.getItems(true);
+								break;
 							}
-						} else {
-							Thread.sleep(5000);
+							catch (RemoteException event) {
+								System.out.println("Error: [" + event.getMessage() + "]");
+								this.servers.pop();
+							}
 						}
 					}
 				}
-				catch (RemoteException | InterruptedException event) {
-					System.out.println("Error: [" + event.getMessage() + "]");
-				}
+			} else {
+				this.proccesing = false;
 			}
-		});
-		this.checkTransactions.start();
+		}
 	}
 	
 	private void initMasterServer(int port, String domainName) throws RemoteException, AlreadyBoundException {
@@ -76,7 +80,13 @@ public class MasterServer extends UnicastRemoteObject implements InterfaceMaster
 	
 	@Override
 	public void addServer(String host, InterfaceServer server) throws RemoteException {
-		this.servers.push(server);
+		if (this.servers.size() == 0) {
+			this.servers.push(server);
+		} else {
+			InterfaceServer mainServer = this.servers.peek();
+			this.servers.push(server);
+			this.sincronizedServers(mainServer);
+		}
 		System.out.println("The server " + host + " was conected");
 	}
 	
@@ -85,6 +95,11 @@ public class MasterServer extends UnicastRemoteObject implements InterfaceMaster
 		InterfaceClient client = this.users.get(host);
 		Transaction transaction = new Transaction(host, client.getCart(), client.getProducts(), this);
 		this.transactions.add(transaction);
+		if (!this.proccesing) {
+			this.proccesing = true;
+			this.proccess();
+		}
+		System.out.println("New transaction from " + host);
 	}
 	
 	@Override
@@ -118,6 +133,12 @@ public class MasterServer extends UnicastRemoteObject implements InterfaceMaster
 	public Map<Integer, Product> getClientProducts(String username, String password) throws RemoteException {
 		InterfaceServer server = this.servers.peek();
 		return server.getClientProducts(username, password);
+	}
+	
+	public void sincronizedServers(InterfaceServer mainServer) throws RemoteException {
+		for (InterfaceServer server : this.servers) {
+			server.sincronized(mainServer.getProducts(), mainServer.getUsers());
+		}
 	}
 	
 	public static void main(String[] args) {

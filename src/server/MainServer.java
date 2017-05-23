@@ -121,6 +121,11 @@ public class MainServer extends UnicastRemoteObject implements InterfaceServer {
 	}
 	
 	@Override
+	public Map<String, Client> getUsers() throws RemoteException {
+		return this.users;
+	}
+	
+	@Override
 	public Map<Integer, Product> getClientProducts(String username, String password) throws RemoteException {
 		if (this.login(username, password)) {
 			Client client = this.users.get(username);
@@ -129,10 +134,22 @@ public class MainServer extends UnicastRemoteObject implements InterfaceServer {
 		return null;
 	}
 	
+	@Override
+	public void sincronized(Map<Integer, Product> products, Map<String, Client> users) throws RemoteException {
+		this.users = users;
+		this.products = products;
+		System.out.println("Server sincronized");
+	}
+	
 	public static void main(String[] args) {
+		String host = "localhost";
+		if (args.length != 0) {
+			host = args[0];
+		}
 		try {
+			System.out.println(host);
 			MainServer server = new MainServer();
-			server.initServer("localhost", 3000, "Alefi");
+			server.initServer(host, 3000, "Alefi");
 		}
 		catch (RemoteException | NotBoundException | UnknownHostException event) {
 			System.out.println("Error: [" + event.getMessage() + "]");

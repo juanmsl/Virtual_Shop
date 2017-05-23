@@ -123,9 +123,14 @@ public class Client extends UnicastRemoteObject implements InterfaceClient {
 	}
 	
 	public static void main(String[] args) {
+		String host = "localhost";
+		if (args.length != 0) {
+			host = args[0];
+		}
 		try {
+			System.out.println(host);
 			Client client = new Client();
-			client.initClient("localhost", 3000, "Alefi");
+			client.initClient(host, 3000, "Alefi");
 		}
 		catch (RemoteException | NotBoundException | UnknownHostException | ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException event) {
 			System.out.println("Error: [" + event.getMessage() + "]");

@@ -44,7 +44,7 @@ public class Transaction {
 			}
 		}
 		catch (RemoteException event) {
-			System.out.println("Error: [" + event.getMessage() + "]");
+			System.out.println("Error in the validation of transaction " + this.host + ": [" + event.getMessage() + "]");
 		}
 		return false;
 	}
