@@ -15,5 +15,5 @@ public interface InterfaceClient extends Remote {
 	
 	public String getUsername() throws RemoteException;
 	
-	public void getItems(boolean update) throws RemoteException;
+	public void getItems(boolean update, boolean isOK) throws RemoteException;
 }

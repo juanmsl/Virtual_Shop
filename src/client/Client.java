@@ -62,12 +62,13 @@ public class Client extends UnicastRemoteObject implements InterfaceClient {
 	}
 	
 	@Override
-	public void getItems(boolean update) throws RemoteException {
+	public void getItems(boolean update, boolean isOK) throws RemoteException {
 		this.products = this.masterServer.getProducts();
 		this.clientProducts = this.masterServer.getClientProducts(this.username, this.password);
 		this.cart = new HashMap<>();
 		if (update) {
 			this.frame.loadLists();
+			this.frame.notify(isOK);
 		}
 	}
 	
@@ -75,7 +76,7 @@ public class Client extends UnicastRemoteObject implements InterfaceClient {
 		if (this.masterServer.signup(username, password)) {
 			this.username = username;
 			this.password = password;
-			this.getItems(false);
+			this.getItems(false, true);
 			return true;
 		}
 		return false;
@@ -85,7 +86,7 @@ public class Client extends UnicastRemoteObject implements InterfaceClient {
 		if (this.masterServer.login(username, password)) {
 			this.username = username;
 			this.password = password;
-			this.getItems(false);
+			this.getItems(false, true);
 			return true;
 		}
 		return false;

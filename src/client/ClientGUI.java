@@ -58,4 +58,9 @@ public class ClientGUI extends JFrame {
 		this.contentPane.add(this.panelLogin, BorderLayout.CENTER);
 		this.contentPane.updateUI();
 	}
+	
+	public void notify(boolean isOK) {
+		/* if (isOK) { JOptionPane.showMessageDialog(this, "Compra realizada"); } else { JOptionPane.showMessageDialog(this, "Surgio un problema, vuelva a intentar"); } */
+		System.out.println("Respondio");
+	}
 }
